@@ -19,6 +19,8 @@ const Profile = () => {
         setUser(undefined);
     }
 
+    const isAdmin = user?.user_metadata?.role === "admin";
+
     return (
         <div>
             <Popover>
@@ -34,12 +36,12 @@ const Profile = () => {
                         <p>{user?.user_metadata.user_name}</p>
                         <p className='text-gray-500'>{user?.user_metadata.email}</p>
                     </div>
-                    <Link href="/dashboard" className='block'>
+                    {isAdmin && <Link href="/dashboard" className='block'>
                         <Button variant="ghost" className='w-full flex items-center justify-between'>
                             ダッシュボード
                             <DashboardIcon />
                         </Button>
-                    </Link>
+                    </Link>}
                     <Button
                         onClick={handleLogout}
                         variant="ghost" className='w-full flex items-center justify-between'>

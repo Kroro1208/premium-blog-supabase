@@ -55,11 +55,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (
-    pathname.startsWith("/dashboard/members") &&
-    session.user.user_metadata.role !== "admin"
-  ) {
-    // 管理者以外のユーザーが /dashboard/members にアクセスしようとした場合、
+  const userRole = session.user.user_metadata.role;
+
+  if (userRole !== "admin") {
+    // 管理者以外のユーザーがダッシュボードにアクセスしようとした場合、
+    // ホームページにリダイレクト
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (pathname.startsWith("/dashboard/members") && userRole !== "admin") {
+    // 追加のチェック：管理者以外のユーザーが /dashboard/members にアクセスしようとした場合、
     // ダッシュボードのメインページにリダイレクト
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
