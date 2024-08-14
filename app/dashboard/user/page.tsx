@@ -3,7 +3,7 @@ import React from 'react'
 const UserPage = () => {
     return (
         <div>
-            ユーザー
+            User一覧
         </div>
     )
 }

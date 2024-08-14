@@ -23,8 +23,8 @@ const BlogTable = () => {
                 </div>
                 <div className="grid grid-cols-5 p-4 items-center">
                     <h1 className="col-span-2 font-semibold">記事タイトル例</h1>
-                    <div className="flex items-center"><Switch /></div>
-                    <div className="flex items-center"><Switch /></div>
+                    <div className="flex items-center"><Switch checked={false} /></div>
+                    <div className="flex items-center"><Switch checked={true} /></div>
                     <Actions />
                 </div>
             </div>

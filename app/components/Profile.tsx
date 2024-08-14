@@ -5,18 +5,32 @@ import { DashboardIcon, LockOpen1Icon } from '@radix-ui/react-icons';
 import { createBrowserClient } from '@supabase/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const Profile = () => {
     const user = useUser((state) => state.user);
     const setUser = useUser((state) => state.setUser);
+    const router = useRouter();
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
+    useEffect(() => {
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setUser(undefined);
+                router.push("/");
+            }
+        });
+        return () => {
+            authListener.subscription.unsubscribe();
+        }
+    }, [supabase.auth, setUser, router]);
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        setUser(undefined);
     }
 
     const isAdmin = user?.user_metadata?.role === "admin";

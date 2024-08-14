@@ -3,19 +3,29 @@
 import { Button } from '@/components/ui/button'
 import { FaGithub, FaGoogle } from 'react-icons/fa'
 import { createBrowserClient } from '@supabase/ssr'
-import { usePathname } from 'next/navigation'
-import { useState, useCallback } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState, useCallback, useEffect } from 'react'
 
 type Provider = 'github' | 'google';
 
 const LoginForm = () => {
     const [isLoading, setIsLoading] = useState<Provider | null>(null);
     const pathname = usePathname();
+    const router = useRouter();
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+
+    useEffect(() => {
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event == 'SIGNED_IN' && session) {
+                router.refresh();
+            }
+        });
+        return authListener.subscription.unsubscribe();
+    }, [supabase.auth, router]);
 
     const handleLogin = useCallback(async (provider: Provider) => {
         try {
