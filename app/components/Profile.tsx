@@ -5,10 +5,6 @@ import { DashboardIcon, LockOpen1Icon } from '@radix-ui/react-icons';
 import { createBrowserClient } from '@supabase/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useCallback, useState } from 'react';
-
-type Provider = 'github' | 'google';
 
 const Profile = () => {
     const user = useUser((state) => state.user);

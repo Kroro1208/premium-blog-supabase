@@ -24,11 +24,6 @@ export async function middleware(request: NextRequest) {
             value,
             ...options,
           });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
           response.cookies.set({
             name,
             value,
@@ -41,11 +36,6 @@ export async function middleware(request: NextRequest) {
             value: "",
             ...options,
           });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
           response.cookies.set({
             name,
             value: "",
@@ -56,20 +46,25 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const { data } = await supabase.auth.getSession();
-
-  if (data.session) {
-    if (
-      // protect this page only admin can access this /dashboard/members
-      data.session.user.user_metadata.role !== "admin"
-    ) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  } else {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (!session) {
+    // ユーザーが認証されていない場合、ログインページにリダイレクト
+    return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  if (
+    pathname.startsWith("/dashboard/members") &&
+    session.user.user_metadata.role !== "admin"
+  ) {
+    // 管理者以外のユーザーが /dashboard/members にアクセスしようとした場合、
+    // ダッシュボードのメインページにリダイレクト
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return response;
 }
 
 export const config = {
