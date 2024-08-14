@@ -29,7 +29,6 @@ const LoginForm = () => {
             if (error) throw error;
         } catch (error) {
             console.error(`${provider} login error:`, error);
-            // ここでユーザーにエラーを通知するロジックを追加
         } finally {
             setIsLoading(null);
         }
