@@ -18,6 +18,9 @@ import { EyeOpenIcon, Pencil1Icon, RocketIcon, StarIcon } from "@radix-ui/react-
 import { Switch } from "@/components/ui/switch"
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { Textarea } from "@/components/ui/textarea";
+import MarkDown from "@/app/components/markdown/MarkDown";
 
 const FormSchema = z.object({
     title: z.string().min(2, {
@@ -34,6 +37,7 @@ const FormSchema = z.object({
 export default function BlogForm() {
     const [isPreview, setPreview] = useState(false);
     const form = useForm<z.infer<typeof FormSchema>>({
+        mode: "all",
         resolver: zodResolver(FormSchema),
         defaultValues: {
             title: "",
@@ -59,7 +63,7 @@ export default function BlogForm() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full rounded-md border space-y-6">
                 <div className="p-5 gap-5 flex flex-wrap items-center justify-between">
-                    <div className="flex gap-5 items-center border-b">
+                    <div className="flex gap-5 items-center border-b flex-wrap">
                         <span role="button" tabIndex={0}
                             className="flex items-center gap-1 border bg-zinc-700 p-2 rounded-lg hover:ring-2 hover:ring-green-500"
                             onClick={() => setPreview(!isPreview)}
@@ -110,7 +114,7 @@ export default function BlogForm() {
                             )}
                         />
                     </div>
-                    <Button className="flex items-center gap-1">
+                    <Button className="flex items-center gap-1" disabled={!form.formState.isValid}>
                         <IoSaveOutline />
                         保存
                     </Button>
@@ -121,7 +125,7 @@ export default function BlogForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <div className="p-2 w-full flex break-words gap-2">
+                                <div className={cn("p-2 w-full flex break-words gap-2", isPreview ? "divide-x-0" : "divide-x")}>
                                     <Input placeholder="タイトルを入力" {...field}
                                         className={cn("border-none text-lg font-medium leading-relaxed",
                                             isPreview ? "w-0 p-0" : "w-full lg:w-1/2")}
@@ -131,7 +135,63 @@ export default function BlogForm() {
                                     </div>
                                 </div>
                             </FormControl>
-                            <FormMessage />
+                            {form.getFieldState("title").invalid && form.getValues().title && <FormMessage />}
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="image_url"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                                <div className={cn("p-2 w-full flex break-words gap-2", isPreview ? "divide-x-0" : "divide-x")}>
+                                    <Input placeholder="画像アップロード" {...field}
+                                        className={cn("border-none text-lg font-medium leading-relaxed",
+                                            isPreview ? "w-0 p-0" : "w-full lg:w-1/2")}
+                                    />
+                                    <div className={cn("lg:px-10", isPreview ? "w-full mx-auto lg:w-4/5" : "w-1/2 lg:blok")}>
+                                        {isPreview ? (
+                                            <>
+                                                画像プレビューを表示
+                                            </>)
+                                            : (
+                                                <>
+                                                    <div className="relative h-80 mt-5 border rounded-md">
+                                                        <Image src={form.getValues().image_url} alt="preview" fill
+                                                            className="object-cover object-center rounded-md"
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
+                                    </div>
+                                </div>
+                            </FormControl>
+                            {form.getFieldState("image_url").invalid && form.getValues().image_url && (
+                                <div className="p-2">
+                                    <FormMessage />
+                                </div>
+                            )}
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                                <div className={cn("p-2 w-full flex break-words gap-2", isPreview ? "divide-x-0" : "divide-x h-70vh")}>
+                                    <Textarea placeholder="記事内容を入力" {...field}
+                                        className={cn("border-none text-lg font-medium leading-relaxed resize-none",
+                                            isPreview ? "w-0 p-0" : "w-full lg:w-1/2")}
+                                    />
+                                    <div className={cn("lg:px-10", isPreview ? "w-full mx-auto lg:w-4/5" : "w-1/2 lg:blok")}>
+                                        <MarkDown content={form.getValues().content} />
+                                    </div>
+                                </div>
+                            </FormControl>
+                            {form.getFieldState("content").invalid && form.getValues().content && <FormMessage />}
                         </FormItem>
                     )}
                 />
