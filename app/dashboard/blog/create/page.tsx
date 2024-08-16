@@ -32,7 +32,21 @@ const FormSchema = z.object({
     }),
     is_free: z.boolean(),
     is_premium: z.boolean(),
-})
+}).refine((data) => {
+    const image_url = data.image_url
+    try {
+        const url = new URL(image_url);
+        return url.hostname === "images.unsplash.com";
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+},
+    {
+        message: 'サポートされていない画像がアップロードされています',
+        path: ["image_url"]
+    }
+);
 
 export default function BlogForm() {
     const [isPreview, setPreview] = useState(false);
@@ -61,12 +75,12 @@ export default function BlogForm() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full rounded-md border space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full rounded-md border space-y-6 pb-10">
                 <div className="p-5 gap-5 flex flex-wrap items-center justify-between">
                     <div className="flex gap-5 items-center border-b flex-wrap">
                         <span role="button" tabIndex={0}
                             className="flex items-center gap-1 border bg-zinc-700 p-2 rounded-lg hover:ring-2 hover:ring-green-500"
-                            onClick={() => setPreview(!isPreview)}
+                            onClick={() => setPreview(!isPreview && !form.getFieldState("image_url").invalid)}
                         >{isPreview ? (
                             <>
                                 <Pencil1Icon />
@@ -151,11 +165,8 @@ export default function BlogForm() {
                                             isPreview ? "w-0 p-0" : "w-full lg:w-1/2")}
                                     />
                                     <div className={cn("lg:px-10", isPreview ? "w-full mx-auto lg:w-4/5" : "w-1/2 lg:blok")}>
-                                        {isPreview ? (
-                                            <>
-                                                画像プレビューを表示
-                                            </>)
-                                            : (
+                                        {isPreview ?
+                                            (
                                                 <>
                                                     <div className="relative h-80 mt-5 border rounded-md">
                                                         <Image src={form.getValues().image_url} alt="preview" fill
@@ -163,6 +174,9 @@ export default function BlogForm() {
                                                         />
                                                     </div>
                                                 </>
+                                            )
+                                            : (
+                                                <>画像プレビューを表示</>
                                             )}
                                     </div>
                                 </div>
@@ -186,7 +200,7 @@ export default function BlogForm() {
                                         className={cn("border-none text-lg font-medium leading-relaxed resize-none",
                                             isPreview ? "w-0 p-0" : "w-full lg:w-1/2")}
                                     />
-                                    <div className={cn("lg:px-10", isPreview ? "w-full mx-auto lg:w-4/5" : "w-1/2 lg:blok")}>
+                                    <div className={cn("overflow-y-auto", isPreview ? "w-full mx-auto lg:w-4/5" : "w-1/2 lg:blok")}>
                                         <MarkDown content={form.getValues().content} />
                                     </div>
                                 </div>
