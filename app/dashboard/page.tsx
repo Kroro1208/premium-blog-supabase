@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { PlusIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
-import BlogTable from './componets/BlogTable'
+import BlogTable from './components/BlogTable'
 
 const DashboardPage = () => {
     return (
