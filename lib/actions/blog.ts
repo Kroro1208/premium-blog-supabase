@@ -1,36 +1,17 @@
-import { createServerClient } from "@supabase/ssr";
+"use server";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import type { Database } from "../types/supabase";
 import { BlogFormSchemaType } from "@/app/dashboard/schema";
 
 // Supabaseクライアントを作成。
 // SSR環境でSupabaseを使用するために設計
-export function createClient() {
-  const cookieStore = cookies();
-
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll().map((c) => ({
-            name: c.name,
-            value: c.value,
-          }));
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach((cookie) => {
-            cookieStore.set(cookie.name, cookie.value, cookie.options);
-          });
-        },
-      },
-    }
-  );
+export async function createClient() {
+  return createServerComponentClient<Database>({ cookies });
 }
 
 export async function createBlog(data: BlogFormSchemaType) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { content, ...blogData } = data;
 
   const { data: blog, error: blogError } = await supabase
